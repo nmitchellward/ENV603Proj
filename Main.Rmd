@@ -1,0 +1,45 @@
+---
+title: "Main"
+author: "Noah Mitchell-Ward"
+date: "4/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(ggplot2)
+
+MISO <- read.csv(file = 'Data/EnergyAcuity_MISO.csv')
+
+```
+
+## Simple Plot Testing
+
+```{r bar chart, echo=FALSE}
+
+
+
+MISO$Fuel <- factor(MISO$Fuel,levels = c("Hydro", "Nuclear", "Coal","Combined Cycle", "Gas", "Solar", "Wind"))
+
+ggplot(data=subset(MISO, !is.na(Fuel)), aes(x = Fuel, y = Summer.MW, fill = Fuel)) + 
+  geom_col() + 
+  geom_col(position = "dodge2") +
+  labs(x = NULL, y = "Total MW submitted to queue since 2000", fill = "Religion") +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position = "none") +
+  #scale_fill_brewer(palette="Accent") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  ggtitle("Wind has been the most dominant generation type\nin the MISO queue since 2000") + 
+  scale_fill_manual(values = c("Hydro" = "steelblue", "Nuclear" = "mediumorchid3", 
+  "Coal" = "darkgray", "Combined Cycle" = "tomato", "Gas" = "tomato", "Solar" = "gold", "Wind" = "forestgreen"))
+  
+ggsave("MISO Overview by Fuel Type.png",
+  plot = last_plot(),
+  dpi = 500)
+
+
+
+```
+
