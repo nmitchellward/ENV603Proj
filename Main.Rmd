@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 require(ggplot2)
+require(dplyr)
 
 MISO <- read.csv(file = 'Data/EnergyAcuity_MISO.csv')
 
@@ -18,14 +19,15 @@ MISO <- read.csv(file = 'Data/EnergyAcuity_MISO.csv')
 
 ```{r bar chart, echo=FALSE}
 
-
-
 MISO$Fuel <- factor(MISO$Fuel,levels = c("Hydro", "Nuclear", "Coal","Combined Cycle", "Gas", "Solar", "Wind"))
+MISO$Summer.MW <- as.numeric(as.character(MISO$Summer.MW))
 
+#plots historical queue
 ggplot(data=subset(MISO, !is.na(Fuel)), aes(x = Fuel, y = Summer.MW, fill = Fuel)) + 
   geom_col() + 
   geom_col(position = "dodge2") +
-  labs(x = NULL, y = "Total MW submitted to queue since 2000", fill = "Religion") +
+  labs(x = NULL, y = "Total GW submitted to queue since 2000", fill = "Religion") +
+  scale_y_continuous(labels = function(x) format(x/1000)) +
   coord_flip() +
   theme_bw() +
   theme(legend.position = "none") +
@@ -35,11 +37,29 @@ ggplot(data=subset(MISO, !is.na(Fuel)), aes(x = Fuel, y = Summer.MW, fill = Fuel
   scale_fill_manual(values = c("Hydro" = "steelblue", "Nuclear" = "mediumorchid3", 
   "Coal" = "darkgray", "Combined Cycle" = "tomato", "Gas" = "tomato", "Solar" = "gold", "Wind" = "forestgreen"))
   
-ggsave("MISO Overview by Fuel Type.png",
+ggsave("MISO Historical Queue by Fuel Type.png",
   plot = last_plot(),
   dpi = 500)
 
-
+#plots currently Active queue projects
+MISO <- MISO %>% filter(Request.Status == 'Active')
+ggplot(data=subset(MISO, !is.na(Fuel)), aes(x = Fuel, y = Summer.MW, fill = Fuel)) + 
+  geom_col() + 
+  geom_col(position = "dodge2") +
+  labs(x = NULL, y = "Total GW Currently Active in MISO Queue", fill = "Religion") +
+  scale_y_continuous(labels = function(x) format(x/1000)) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position = "none") +
+  #scale_fill_brewer(palette="Accent") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  ggtitle("Solar Currently Dominates MISO Queue") + 
+  scale_fill_manual(values = c("Hydro" = "steelblue", "Nuclear" = "mediumorchid3", 
+  "Coal" = "darkgray", "Combined Cycle" = "tomato", "Gas" = "tomato", "Solar" = "gold", "Wind" = "forestgreen"))
+  
+ggsave("MISO Current Queue by Fuel Type.png",
+  plot = last_plot(),
+  dpi = 500)
 
 ```
 
